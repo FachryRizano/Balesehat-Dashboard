@@ -1,0 +1,16 @@
+# Menggunakan image Python sebagai dasar
+FROM python:3.7
+
+# Menetapkan direktori kerja
+WORKDIR /app
+
+# Menyalin file requirements.txt
+COPY ./src/app/api/. .
+
+# Menginstal dependensi
+RUN pip install -r requirements.txt
+
+ENV FLASK_APP app.py
+
+# Menentukan perintah untuk menjalankan aplikasi Flask
+CMD ["flask", "run", "--host=0.0.0.0"]
