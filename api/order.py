@@ -4,8 +4,8 @@ q_daily_trend = """
 WITH subquery AS (
 	SELECT 
 		distinct invoice,
-		TO_CHAR(TO_TIMESTAMP(payment_timestamp, 'DD/MM/YYYY'), 'DY') AS days,
-		TO_CHAR(TO_TIMESTAMP(payment_timestamp, 'DD/MM/YYYY'),'YYYY-MM-DD') as tanggal
+		TO_CHAR(TO_TIMESTAMP(payment_timestamp, 'DD-MM-YYYY'), 'DY') AS days,
+		TO_CHAR(TO_TIMESTAMP(payment_timestamp, 'DD-MM-YYYY'),'YYYY-MM-DD') as tanggal
 	FROM 
 		tokopedia.order
 ),subquery_2 as (
@@ -34,9 +34,9 @@ q_monthly="""
 WITH subquery AS (
 		SELECT 
 			distinct invoice,
-			TO_CHAR(TO_TIMESTAMP(payment_timestamp, 'DD/MM/YYYY'), 'Mon') AS month,
-			TO_CHAR(TO_TIMESTAMP(payment_timestamp, 'DD/MM/YYYY'), 'YYYY') AS year,
-			TO_TIMESTAMP(payment_timestamp, 'DD/MM/YYYY') as tanggal
+			TO_CHAR(TO_TIMESTAMP(payment_timestamp, 'DD-MM-YYYY'), 'Mon') AS month,
+			TO_CHAR(TO_TIMESTAMP(payment_timestamp, 'DD-MM-YYYY'), 'YYYY') AS year,
+			TO_TIMESTAMP(payment_timestamp, 'DD-MM-YYYY') as tanggal
 		FROM 
 			tokopedia.order
 	),
@@ -90,10 +90,10 @@ order by d
 
 q_order_process_time="""
 SELECT 
-	ROUND(EXTRACT(EPOCH FROM (TO_TIMESTAMP(shipment_timestamp, 'DD/MM/YYYY HH24:MI:SS') - TO_TIMESTAMP(payment_timestamp, 'DD/MM/YYYY HH24:MI:SS'))) / 3600,2) AS process_time_hours
+	ROUND(EXTRACT(EPOCH FROM (TO_TIMESTAMP(shipment_timestamp, 'YYYY-MM-DD HH24:MI:SS') - TO_TIMESTAMP(payment_timestamp, 'DD-MM-YYYY HH24:MI:SS'))) / 3600,2) AS process_time_hours
 FROM 
 	tokopedia.order
-WHERE EXTRACT(EPOCH FROM (TO_TIMESTAMP(shipment_timestamp, 'DD/MM/YYYY HH24:MI:SS') - TO_TIMESTAMP(payment_timestamp, 'DD/MM/YYYY HH24:MI:SS'))) / 3600 is not NULL
+WHERE EXTRACT(EPOCH FROM (TO_TIMESTAMP(shipment_timestamp, 'YYYY-MM-DD HH24:MI:SS') - TO_TIMESTAMP(payment_timestamp, 'DD-MM-YYYY HH24:MI:SS'))) / 3600 is not NULL
 AND shipment_timestamp != '-'
 ORDER BY 
 	process_time_hours;
@@ -200,7 +200,7 @@ q_monthly_sales = """
 WITH subquery as (SELECT 
 	distinct invoice, 
 	total_sales,
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'Mon') || ' ' || TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'YYYY') AS month_year
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'Mon') || ' ' || TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'YYYY') AS month_year
 FROM 
 	tokopedia.order)
 SELECT 
@@ -218,7 +218,7 @@ q_daily_sales="""
 WITH subquery as (SELECT 
 	distinct invoice, 
 	total_sales,
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'DD-MM-YYYY') as date
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'DD-MM-YYYY') as date
 FROM 
 	tokopedia.order)
 SELECT 
@@ -228,14 +228,14 @@ from subquery
 GROUP BY
 date
 ORDER BY
-	TO_TIMESTAMP(date::text, 'DD/MM/YYYY')
+	TO_TIMESTAMP(date::text, 'DD-MM-YYYY')
 """
 
 q_yearly_sales = """
 WITH subquery as (SELECT 
 	distinct invoice, 
 	total_sales,
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'YYYY') AS year
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'YYYY') AS year
 FROM 
 	tokopedia.order)
 SELECT 
@@ -250,7 +250,7 @@ ORDER BY
 
 q_yearly_order_count="""
 SELECT 
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'YYYY') AS year,
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'YYYY') AS year,
 	count(DISTINCT invoice)
 	
 FROM
@@ -259,12 +259,12 @@ FROM
 GROUP BY
 	year
 ORDER BY
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'YYYY')
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'YYYY')
 """
 
 q_monthly_order_count = """
 SELECT 
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'Mon') || ' ' || TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'YYYY') AS month_year,
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'Mon') || ' ' || TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'YYYY') AS month_year,
 	count(DISTINCT invoice)
 	
 FROM
@@ -272,24 +272,64 @@ FROM
 	
 GROUP BY
 	month_year,
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'MM'),
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'YYYY')
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'MM'),
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'YYYY')
 ORDER BY
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'YYYY'),
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'MM')
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'YYYY'),
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'MM')
 """
 q_daily_order_count ="""
 SELECT 
-	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY'), 'DD-MM-YYYY') as date,
+	TO_CHAR(TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY'), 'DD-MM-YYYY') as date,
 	count(DISTINCT invoice)
 	
 FROM
 	tokopedia.order
 GROUP BY
-	TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY')
+	TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY')
 ORDER BY
-	TO_TIMESTAMP(payment_timestamp::text, 'DD/MM/YYYY')
+	TO_TIMESTAMP(payment_timestamp::text, 'DD-MM-YYYY')
 """
 
+# q_avg_net_price_purchase = """
+# SELECT 
+#     payment_timestamp_year,
+#     payment_timestamp_month,
+#     product_name,
+#     ROUND(AVG(price_per_purchased_based_on_net_payment)) AS avg_price_per_purchased
+# FROM 
+#     tokopedia.order
+# GROUP BY 
+#     payment_timestamp_year,
+#     payment_timestamp_month,
+#     product_name;
+# """
+
+q_avg_net_price_purchase = """
+WITH all_combinations AS (
+    SELECT 
+        y.payment_timestamp_year,
+        m.payment_timestamp_month,
+        p.product_name
+    FROM 
+        (SELECT DISTINCT payment_timestamp_year FROM tokopedia.order) y
+        CROSS JOIN (SELECT DISTINCT payment_timestamp_month FROM tokopedia.order) m
+        CROSS JOIN (SELECT DISTINCT product_name FROM tokopedia.order) p
+)
+SELECT 
+    ac.payment_timestamp_year,
+    ac.payment_timestamp_month,
+    ac.product_name,
+    COALESCE(ROUND(AVG(o.price_per_purchased_based_on_net_payment)), 0) AS avg_price_per_purchased
+FROM 
+    all_combinations ac
+    LEFT JOIN tokopedia.order o ON ac.payment_timestamp_year = o.payment_timestamp_year
+                                  AND ac.payment_timestamp_month = o.payment_timestamp_month
+                                  AND ac.product_name = o.product_name
+GROUP BY 
+    ac.payment_timestamp_year,
+    ac.payment_timestamp_month,
+    ac.product_name;
+"""
 
 

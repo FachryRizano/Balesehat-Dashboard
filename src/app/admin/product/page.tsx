@@ -3,11 +3,13 @@ import Table from 'components/admin/ads/Table';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Trend from 'components/admin/product/Trend';
+import NetPurchasePerInvoice from 'components/admin/product/NetPurchasePerInvoice';
 const Product = () => {
   const [loading, setLoading] = useState(true);
   const [productPerformanceCategory,setProductPerformanceCategory] = useState({})
   const [productPerformance, setProductPerformance] = useState({})
   const [productTrend,setProductTrend] = useState({})
+  const [netPurchaseInvoiceProduct,setNetPurchaseInvoiceProduct] = useState({})
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -17,6 +19,7 @@ const Product = () => {
         setProductPerformanceCategory(data.product_performance_category)
         setProductPerformance(data.product_performance)
         setProductTrend(data.product_monthly_trend)
+        setNetPurchaseInvoiceProduct(data.net_purchase_product_per_invoice)
         setLoading(false); // Set loading to false once the data is fetched
       } catch (error) {
         console.error("Error fetching data: ", error);
@@ -29,6 +32,7 @@ const Product = () => {
   if (!loading) {
     return (
       <div>
+        <NetPurchasePerInvoice title={`Net Purchase Per Invoice`} fetchData={netPurchaseInvoiceProduct} productArray={Object.keys(productTrend)}/>
         <Trend title={`Monthly Product`} fetchData={productTrend}/>
         <Table title={'Product Performance Category'} tableData={productPerformanceCategory} columnOrder={['category','product_purchase','revenue']} />
         <Table title={'Product Performance'} tableData={productPerformance} columnOrder={['product_name','avg_products_sold','avg_cart','avg_wishlist','avg_products_viewed','avg_conversion']} />

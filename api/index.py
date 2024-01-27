@@ -16,47 +16,48 @@ from flask_jwt_extended import create_access_token,get_jwt,get_jwt_identity, \
                                unset_jwt_cookies, jwt_required, JWTManager
                                
 app = Flask(__name__)
-app.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
+# app.config["JWT_SECRET_KEY"] = "please-remember-to-change-me"
+# app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
 
-jwt = JWTManager(app)
+# jwt = JWTManager(app)
 
-CORS(jwt, resources={r"/api/*": {"origins": "http://localhost:3000"}})
+# CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})
 # Database configuration (update these with your database credentials)
 DATABASE = 'balesehat01'
-USER = 'admin'
-# USER = 'postgres'
+# USER = 'admin'
+USER = 'postgres'
 PASSWORD = 'asdswt123'
 HOST = 'localhost'  # localhost if your database is on the same server
-PORT = '5431'  # default PostgreSQL port
-# PORT = '5432'  # default PostgreSQL port
+# PORT = '5431'  # default PostgreSQL port
+PORT = '5432'  # default PostgreSQL port
 
 
-@app.route('/token', methods=["POST"])
-def create_token():
-    email = request.json.get("email", None)
-    password = request.json.get("password", None)
-    if email != "test" or password != "test":
-        return {"msg": "Wrong email or password"}, 401
+# @app.route('/token', methods=["POST"])
+# def create_token():
+#     email = request.json.get("email", None)
+#     password = request.json.get("password", None)
+#     if email != "test" or password != "test":
+#         return {"msg": "Wrong email or password"}, 401
 
-    access_token = create_access_token(identity=email)
-    response = {"access_token":access_token}
-    return response
+#     access_token = create_access_token(identity=email)
+#     response = {"access_token":access_token}
+#     return response
 
-@app.route('/profile')
-def my_profile():
-    response_body = {
-        "name": "Nagato",
-        "about" :"Hello! I'm a full stack developer that loves python and javascript"
-    }
+# @app.route('/profile')
+# def my_profile():
+#     response_body = {
+#         "name": "Nagato",
+#         "about" :"Hello! I'm a full stack developer that loves python and javascript"
+#     }
 
-    return response_body
+#     return response_body
 
-@app.route("/logout", methods=["POST"])
-def logout():
-    response = jsonify({"msg": "logout successful"})
-    unset_jwt_cookies(response)
-    return response
+# @app.route("/logout", methods=["POST"])
+# def logout():
+#     response = jsonify({"msg": "logout successful"})
+#     unset_jwt_cookies(response)
+#     return response
+
 
 @app.route('/api/order')
 @cross_origin()
@@ -165,6 +166,7 @@ def order():
         'Monthly':convert_growth(monthly_order_count),
         'Yearly':convert_growth(yearly_order_count)
     }
+    
     cur.close()
     conn.close()
 
@@ -181,7 +183,7 @@ def order():
        'order_count':order_count,
        "sales_value_mean":sales_value_mean,
        "sales":sales,
-       "order_count_city":order_count_city
+       "order_count_city":order_count_city,
     }
 
     return jsonify(records)
@@ -350,10 +352,16 @@ def product():
     cur.execute(q_product_monthly_trend)
     product_monthly_trend = convert_product_monthly_trend(cur.fetchall())
     
+    cur.execute(q_avg_net_price_purchase)
+    net_purchase_product_per_invoice = convert_to_multi_index_dict(cur.fetchall())
+    
+    cur.close()
+    conn.close()
     records={
         'product_monthly_trend':product_monthly_trend,
         "product_performance_category":product_performance_category,
         "product_performance":product_performance,
+        "net_purchase_product_per_invoice":net_purchase_product_per_invoice
     }
     return jsonify(records)
     

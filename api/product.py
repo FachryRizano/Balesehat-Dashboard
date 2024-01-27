@@ -1,6 +1,21 @@
 from datetime import datetime
 def parse_date(date_str):
     return datetime.strptime(date_str, "%b %Y")
+
+def convert_to_multi_index_dict(data_list):
+    result = {}
+    for item in data_list:
+        year, month, product_name, value = item
+
+        # Create a nested dictionary with year and product name as keys
+        if year not in result:
+            result[year] = {}
+        if product_name not in result[year]:
+            result[year][product_name] = {'data': []}
+        result[year][product_name]['data'].append(int(value))
+
+    return result
+
 def convert_product_performing_category(input_data):
     result = []
 
